@@ -1,0 +1,47 @@
+{
+  "extends": [
+    "development"
+  ],
+  "hints": {
+    "typescript-config/consistent-casing": "off",
+    "disown-opener": "off",
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": [
+          "font-synthesis",
+          "user-select",
+          "backdrop-filter",
+          "translate",
+          "rotate"
+        ]
+      }
+    ],
+    "axe/forms": [
+      "default",
+      {
+        "label": "off",
+        "select-name": "off"
+      }
+    ],
+    "axe/name-role-value": [
+      "default",
+      {
+        "button-name": "off"
+      }
+    ],
+    "no-inline-styles": "off",
+    "axe/text-alternatives": [
+      "default",
+      {
+        "image-alt": "off"
+      }
+    ],
+    "axe/parsing": [
+      "default",
+      {
+        "duplicate-id-active": "off"
+      }
+    ]
+  }
+}
