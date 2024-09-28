@@ -1,21 +1,22 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState} from 'react';
 import GoogleLogin from '../components/GoogleLogin';
 import FacebookLogin from '../components/FacebookLogin';
 import LoginInput, { loginInputDefault } from '../services/models/LoginInput';
 import useApiRequest from '../hooks/useApiRequest';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ENVIROMENT } from '../environment/enviroment';
-import AccountService from '../services/api/accountService';
+import { useNavigate } from 'react-router-dom';
+import { login } from '../services/api/accountService';
 
 const LOGIN = '/api/account/login';
-
-const accountService = new AccountService();
 
 const Login = () => {
     const [executeRequest, { data, loading, error, code }] = useApiRequest<LoginInput>(
         LOGIN,
         "POST"
     );
+
+    const router = useNavigate();
 
     const [email, setEmail] = useState<string>(''); // Trạng thái cho email
     const [password, setPassword] = useState<string>(''); // Trạng thái cho password
@@ -32,7 +33,14 @@ const Login = () => {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault(); // Ngăn chặn reload trang
-        accountService.login(formValue);
+        const res = await login(formValue);
+        console.log(res);
+        if(res == true){
+            router("/home")
+        }
+        else{
+            console.error(res);
+        }
         // await executeRequest(formValue);
     };
 

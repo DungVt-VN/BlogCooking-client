@@ -2,7 +2,7 @@ import { jwtDecode } from 'jwt-decode'; // Use named import
 import { createContext, useState, ReactNode, useEffect, FC } from 'react';
 import Cookies from 'js-cookie';
 
-interface AuthContextType {
+export interface AuthContextType {
   isAuthenticated: boolean;
   logout: () => void;
   setAuth: (user: string, token: string) => void;
@@ -12,7 +12,7 @@ interface AuthContextType {
   userId: string;
 }
 
-interface AuthToken {
+export interface AuthToken {
   nameid: string;
   given_name: string;
   role?: string[];

@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 import axios, { AxiosHeaders, InternalAxiosRequestConfig } from "axios";
+import { ENVIROMENT } from "../../environment/enviroment";
 
 export default function getInstanceAxios(baseAPI: string) {
   const instance = axios.create({
@@ -7,21 +8,50 @@ export default function getInstanceAxios(baseAPI: string) {
   });
 
   instance.interceptors.request.use(
-    function (config: InternalAxiosRequestConfig) {
+    async function (config: InternalAxiosRequestConfig) {
       const accessToken = Cookies.get("accessToken");
+      const refreshToken = Cookies.get("refreshToken");
 
-      if (!config.headers) {
-        config.headers = new AxiosHeaders(); // Tạo instance của AxiosHeaders
-      }
+      if(config.url?.endsWith('account/refesh-token')){
+        return config;
+      }else 
+      
+      if(refreshToken && accessToken){
+        if (!config.headers) {
+          config.headers = new AxiosHeaders();
+        }
 
-      if (accessToken) {
         config.headers.set("Authorization", `Bearer ${accessToken}`);
+        config.headers.set("Accept", "application/json");
+        config.headers.set("Content-Type", "application/json");
+
+        return config;
+      }else 
+      
+      if(refreshToken && !accessToken){
+        try {
+          // Gửi yêu cầu để lấy access token mới
+          const response = await axios.post(ENVIROMENT.BASE_API+'api/account/refresh', { refreshToken: refreshToken });
+          const newAccessToken = response.data.accessToken; // Giả sử access token mới được trả về
+          const now = new Date();
+          now.setHours(now.getHours() + 1)
+          Cookies.set("accessToken",newAccessToken,{expires:now})
+
+          config.headers['Authorization'] = `Bearer ${newAccessToken}`; // Cập nhật headers
+
+          return config;
+        } catch (error) {
+          console.error('Refresh token failed:', error);
+          return Promise.reject(error);
+        }
       }
 
-      config.headers.set("Accept", "application/json");
-      config.headers.set("Content-Type", "application/json");
-
-      return config;
+      else{
+        if(accessToken){
+          Cookies.remove("accessToken")
+        }
+        return config;
+      }
     },
     function (error) {
       return Promise.reject(error);

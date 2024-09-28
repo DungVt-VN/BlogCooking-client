@@ -1,19 +1,27 @@
 import { ENVIROMENT } from "../../environment/enviroment";
 import LoginInput from "../models/LoginInput";
-import { User } from "../models/user";
-import { Response } from "../models/response";
 import getInstanceAxios from "./getInstanceAxios";
+import Cookies from "js-cookie";
 
-export default class AccountService {
-  baseUrl = ENVIROMENT.BASE_API;
-  private http = getInstanceAxios(this.baseUrl);
+  const baseUrl = ENVIROMENT.BASE_API;
+  const http = getInstanceAxios(baseUrl);
 
-  login = async (loginDto : LoginInput) => {
+  export const login = async (loginDto : LoginInput) => {
     try {
-      const response = await this.http.post<Response<User>>(`${this.baseUrl}api/account/login`, loginDto);
-      console.log(response)
+      const response = await http.post(`${baseUrl}api/account/login`, loginDto);
+      if(response.data){
+        const accessTokenDate = new Date();
+        accessTokenDate.setHours(accessTokenDate.getHours() + 1);
+        const refreshTokenDate = new Date();
+        refreshTokenDate.setDate(refreshTokenDate.getDate() + (loginDto.remember ? 7 : 1))
+        Cookies.set("accessToken",response.data.token,{expires:accessTokenDate});
+        Cookies.set("refreshToken",response.data.refreshToken,{expires:refreshTokenDate});
+        return true;
+      }
+
+      return false
     } catch (error) {
-      console.error("Login failed:", error);
+      return error;
     }
   };
 
@@ -62,4 +70,3 @@ export default class AccountService {
 //         })
 //       );
 //   }
-}
