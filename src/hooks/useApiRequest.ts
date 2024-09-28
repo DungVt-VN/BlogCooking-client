@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios, { AxiosResponse, CancelTokenSource } from "axios";
-import useAuth from "./useAuth";
+// import useAuth from "./useAuth";
 import apiClient from "../services/api/apiClient";
 
 interface UseApiRequestResult<T> {

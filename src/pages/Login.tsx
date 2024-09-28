@@ -3,8 +3,13 @@ import GoogleLogin from '../components/GoogleLogin';
 import FacebookLogin from '../components/FacebookLogin';
 import LoginInput, { loginInputDefault } from '../services/models/LoginInput';
 import useApiRequest from '../hooks/useApiRequest';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ENVIROMENT } from '../environment/enviroment';
+import AccountService from '../services/api/accountService';
 
 const LOGIN = '/api/account/login';
+
+const accountService = new AccountService();
 
 const Login = () => {
     const [executeRequest, { data, loading, error, code }] = useApiRequest<LoginInput>(
@@ -27,11 +32,11 @@ const Login = () => {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault(); // Ngăn chặn reload trang
-        await executeRequest(formValue);
+        accountService.login(formValue);
+        // await executeRequest(formValue);
     };
 
     useEffect(() => {
-        console.log(data);
     }, [data, loading, error, executeRequest])
 
     return (
@@ -47,7 +52,9 @@ const Login = () => {
                                 {error}
                             </p>
                             <div className='flex place-content-between'>
-                                <GoogleLogin />
+                                <GoogleOAuthProvider clientId={ENVIROMENT.GOOGLE_CLIENT_ID}>
+                                    <GoogleLogin />
+                                </GoogleOAuthProvider>
                                 <FacebookLogin />
                             </div>
                             <div className='relative'>
