@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios, { AxiosResponse, CancelTokenSource } from "axios";
-// import useAuth from "./useAuth";
 import apiClient from "../services/api/apiClient";
+import useAuth from "./useAuth";
 
 interface UseApiRequestResult<T> {
   data: T | null;
@@ -12,21 +12,19 @@ interface UseApiRequestResult<T> {
 
 const useApiRequest = <RequestData = unknown, ResponseData = unknown>(
   url: string,
-  method: "POST" | "PUT" | "DELETE",
+  method: "POST" | "PUT" | "DELETE" | "PATCH" | "GET",
   customHeaders?: { [key: string]: string }
 ): [
-  (data: RequestData) => Promise<void>,
+  (data?: RequestData) => Promise<void>,
   UseApiRequestResult<ResponseData>,
 ] => {
   const [data, setData] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState<number | null>(null);
-  // const { token } = useAuth();
-  const token =
-    "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOiI0IiwiZW1haWwiOiJkdXl0aHV5MTBjQGdtYWlsLmNvbSIsIm5iZiI6MTcyNzQ3MzM3MiwiZXhwIjoxNzI3NDc1MTcyLCJpYXQiOjE3Mjc0NzMzNzJ9.KaKj-yB6oS7cIFUlgfKWyga-KApwaraHSJ4uYf6Hu24OBGLcw4tRuoLXAcbH8HTuiKesKYjQ-_hpQE51TaUtAQ";
+  const { token } = useAuth();
 
-  const executeRequest = async (requestData: RequestData) => {
+  const executeRequest = async (requestData?: RequestData) => {
     const source: CancelTokenSource = axios.CancelToken.source();
 
     setLoading(true);
@@ -41,8 +39,34 @@ const useApiRequest = <RequestData = unknown, ResponseData = unknown>(
       }
 
       switch (method) {
+        case "GET":
+          const serializedParams = new URLSearchParams();
+          if (requestData) {
+            Object.keys(requestData).forEach((key) => {
+              const value = requestData[key as keyof RequestData];
+              if (Array.isArray(value)) {
+                value.forEach((v, index) => {
+                  serializedParams.append(`${key}[${index}]`, v);
+                });
+              } else if (value !== null && value !== undefined) {
+                serializedParams.append(key, value.toString());
+              }
+            });
+          }
+          response = await apiClient.get<ResponseData>(url, {
+            params: serializedParams,
+            cancelToken: source.token,
+            headers,
+          });
+          break;
         case "POST":
           response = await apiClient.post<ResponseData>(url, requestData, {
+            cancelToken: source.token,
+            headers,
+          });
+          break;
+        case "PATCH":
+          response = await apiClient.patch<ResponseData>(url, requestData, {
             cancelToken: source.token,
             headers,
           });
@@ -68,15 +92,17 @@ const useApiRequest = <RequestData = unknown, ResponseData = unknown>(
       setData(response.data);
     } catch (err) {
       if (axios.isCancel(err)) {
-        console.log("Yêu cầu bị hủy", err.message);
+        console.log("Yêu cầu bị hủy:", err.message);
+      } else if (axios.isAxiosError(err) && err.response) {
+        setCode(err.response.status);
+        setError(
+          typeof err.response.data === "string"
+            ? err.response.data
+            : JSON.stringify(err.response.data)
+        );
       } else {
-        if (axios.isAxiosError(err) && err.response) {
-          setCode(err.response.status);
-          setError(err.response.data);
-        } else {
-          setCode(null);
-          setError("Failed to fetch data");
-        }
+        setCode(null);
+        setError("Failed to fetch data");
       }
     } finally {
       setLoading(false);

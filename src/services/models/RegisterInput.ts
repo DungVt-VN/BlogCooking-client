@@ -1,7 +1,7 @@
 import { Gender } from "../../data/enum/Gender";
 
 export default interface RegisterInput {
-  nickName: string;
+  username: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -11,7 +11,7 @@ export default interface RegisterInput {
 }
 
 export const registerInput: RegisterInput = {
-  nickName: "",
+  username: "",
   firstName: "",
   lastName: "",
   email: "",
