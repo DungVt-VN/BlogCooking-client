@@ -1,4 +1,4 @@
-export default interface Todos {
+export default interface AdminTodos {
   id: number;
   title: string;
   createdAt: string;

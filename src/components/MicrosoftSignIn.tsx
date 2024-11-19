@@ -1,24 +1,28 @@
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { loginRequest } from "../configs/authConfig";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
-const MICROSOFTLOGINURL =
-  "http://localhost:5029/api/user/login-with-microsoft/";
+const MICROSOFTLOGINURL = "http://localhost:5029/api/user/login-with-microsoft";
 
 const MicrosoftSignIn = () => {
   const { instance, accounts } = useMsal();
   const isAuthenticated = useIsAuthenticated();
-  const [accessToken, setAccessToken] = useState<string>();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const handleLogin = () => {
-    instance.loginRedirect(loginRequest).catch((e) => {
-      console.log("Login error:", e);
-    });
+    instance
+      .loginPopup(loginRequest)
+      .then((response) => {
+        setAccessToken(response.accessToken);
+      })
+      .catch((error) => {
+        console.error("Lỗi đăng nhập:", error);
+      });
   };
 
   useEffect(() => {
-    if (isAuthenticated && accounts.length > 0) {
+    if (isAuthenticated && accounts.length > 0 && !accessToken) {
       instance
         .acquireTokenSilent({
           ...loginRequest,
@@ -28,26 +32,28 @@ const MicrosoftSignIn = () => {
           setAccessToken(response.accessToken);
         })
         .catch((error) => {
-          console.error("Token acquisition error:", error);
+          console.error("Lỗi lấy token:", error);
         });
     }
-  }, [isAuthenticated, accounts, instance]);
+  }, [isAuthenticated, accounts, accessToken, instance]);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!accessToken) return;
 
       try {
-        const response = await axios.post(`${MICROSOFTLOGINURL}`, {
+        const response = await axios.post(MICROSOFTLOGINURL, {
           accessToken: accessToken,
         });
         console.log(response.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Lỗi khi lấy dữ liệu:", error);
       }
     };
 
-    fetchData();
+    if (accessToken) {
+      fetchData();
+    }
   }, [accessToken]);
 
   return (
@@ -65,7 +71,8 @@ const MicrosoftSignIn = () => {
         <path fill="#00A4EF" d="M12 23H1V12h11z" />
         <path fill="#FFB900" d="M23 23H12V12h11z" />
       </svg>
-      Sign in with Microsoft
+      {accessToken}
+      Đăng nhập với Microsoft
     </button>
   );
 };

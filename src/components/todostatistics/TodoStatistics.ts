@@ -3,4 +3,5 @@ export default interface TodoItem {
   title: string;
   createdAt: string;
   user: string;
+  status: "completed" | "inProgress" | "notStarted"; // Trạng thái của todo
 }

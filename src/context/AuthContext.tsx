@@ -30,7 +30,7 @@ interface AuthProviderProps {
 }
 
 const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [roles, setRoles] = useState<string[]>(["Guest"]);
   const [loading, setLoading] = useState<boolean>(true);
   const [token, setToken] = useState<string>("");

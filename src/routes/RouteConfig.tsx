@@ -1,11 +1,16 @@
-import React from 'react';
-import Home from '../pages/Home';
-import Profile from '../pages/Profile';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
-import ForgotPassword from '../pages/ForgotPassword';
-import AboutMe from '../pages/AboutMe';
-import Recipe from '../pages/Recipe';
+import React from "react";
+import Home from "../pages/home/Home";
+import Login from "../pages/login/Login";
+import Register from "../pages/register/Register";
+import ForgotPassword from "../pages/forgotpassword/ForgotPassword";
+import AdminDashboard from "../pages/admindashboard/AdminDashboard";
+import Dashboard from "../pages/dashboard/Dashboard";
+import AllUser from "../pages/alluser/AllUser";
+import AdminTodos from "../pages/admintodos/AdminTodos.tsx";
+import Todo from "../pages/todo/Todo.tsx";
+import AdminTodoStatistics from "../pages/admintodostatistics/AdminTodoStatistics.tsx";
+import CreateTodo from "../pages/createtodo/CreateTodo.tsx";
+
 interface Route {
   path: string;
   component: React.ReactNode;
@@ -15,46 +20,71 @@ interface Route {
 
 const RouteConfig: Route[] = [
   {
-    path: '/home',
+    path: "/home",
     component: <Home />,
     isPrivate: false,
   },
   {
-    path: '/profile',
-    component: <Profile />,
+    path: "/admindashboard",
+    component: <AdminDashboard />,
     isPrivate: false,
   },
   {
-    path: '/login',
+    path: "/login",
     component: <Login />,
     isPrivate: false,
   },
   {
-    path: '/register',
+    path: "/register",
     component: <Register />,
     isPrivate: false,
   },
   {
-    path: '/about',
-    component: <AboutMe />,
+    path: "user/todo",
+    component: <Todo />,
     isPrivate: false,
   },
   {
-    path: '/forgotPassword',
+    path: "user/create",
+    component: <CreateTodo />,
+    isPrivate: false,
+  },
+  {
+    path: "admin/admintodos",
+    component: <AdminTodos />,
+    isPrivate: false,
+  },
+  {
+    path: "admin/stistics",
+    component: <AdminTodoStatistics />,
+    isPrivate: false,
+  },
+  // {
+  //   path: "/about",
+  //   component: <AboutMe />,
+  //   isPrivate: false,
+  // },
+  {
+    path: "/forgotPassword",
     component: <ForgotPassword />,
     isPrivate: false,
   },
   {
-    path: '/recipes',
-    component: <Recipe />,
+    path: "/dashboard",
+    component: <Dashboard />,
     isPrivate: false,
   },
   {
-    path: '/profile22',
-    component: <Profile />,
-    isPrivate: true,
-    allowedRoles: ['User', 'Creator'],
-  }
+    path: "/admin/users",
+    component: <AllUser />,
+    isPrivate: false,
+  },
+  // {
+  //   path: "/profile22",
+  //   component: <Profile />,
+  //   isPrivate: true,
+  //   allowedRoles: ["User", "Creator"],
+  // },
 ];
 
 export default RouteConfig;
